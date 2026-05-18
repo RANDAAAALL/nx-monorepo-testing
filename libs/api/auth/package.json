@@ -1,0 +1,17 @@
+{
+  "name": "@org/api-auth",
+  "version": "0.0.1",
+  "private": true,
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.4",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^3.0.0"
+  }
+}

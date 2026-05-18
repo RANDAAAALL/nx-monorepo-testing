@@ -1,118 +1,175 @@
 import express from 'express';
-import { ProductsService } from '@org/api-products';
-import { ApiResponse, Product, ProductFilter, PaginatedResponse } from '@org/models';
+import cookieParser from 'cookie-parser';
+import { AuthService } from '@org/api-auth';
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3333;
 
 const app = express();
-const productsService = new ProductsService();
+const authService = new AuthService();
 
 // Middleware
 app.use(express.json());
+app.use(cookieParser());
 
-// CORS configuration for React app
+// CORS config
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const allowedOriginsString = process.env.CORS_ALLOWED_ORIGINS || '';
+  const allowedOrigins = allowedOriginsString
+    .split(',')
+    .map((url) => url.trim());
+
+  const origin = req.headers.origin;
+
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept',
+  );
+  res.header('Access-Control-Allow-Credentials', 'true');
+
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
+    return;
   } else {
     next();
+    return;
   }
 });
 
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
   res.send({ message: 'Hello API' });
 });
 
-// Products endpoints
-app.get('/api/products', (req, res) => {
+// me route to get current user info
+app.get('/api/me', async (req, res) => {
+  const token = req.cookies.auth_token;
+
+  if (!token) {
+    res.status(401).send('Unauthorized');
+    return;
+  }
+
+  // decode the token
   try {
-    const filter: ProductFilter = {};
+    const username = Buffer.from(token, 'base64').toString('utf-8');
+    const user = await authService.getUserByUsername(username);
 
-    if (req.query.category) {
-      filter.category = req.query.category as string;
-    }
-    if (req.query.minPrice) {
-      filter.minPrice = Number(req.query.minPrice);
-    }
-    if (req.query.maxPrice) {
-      filter.maxPrice = Number(req.query.maxPrice);
-    }
-    if (req.query.inStock !== undefined) {
-      filter.inStock = req.query.inStock === 'true';
-    }
-    if (req.query.searchTerm) {
-      filter.searchTerm = req.query.searchTerm as string;
+    if (!user) {
+      res.status(401).send('Invalid token');
+      return;
     }
 
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const pageSize = req.query.pageSize ? Number(req.query.pageSize) : 10;
-
-    const result = productsService.getProducts(filter, page, pageSize);
-
-    const response: ApiResponse<PaginatedResponse<Product>> = {
-      data: result,
-      success: true,
-    };
-
-    res.json(response);
-  } catch (error) {
-    const response: ApiResponse<any> = {
-      data: null,
-      success: false,
-      error: 'An error occurred while fetching products',
-    };
-    res.status(500).json(response);
+    res.json({ data: { username: user.username, role: 'admin' } });
+    return;
+  } catch (err) {
+    res.status(401).send('Invalid token format');
+    return;
   }
 });
 
-app.get('/api/products/categories', (req, res) => {
+// registration route
+app.post('/api/register', async (req, res) => {
   try {
-    const categories = productsService.getCategories();
-    const response: ApiResponse<string[]> = {
-      data: categories,
-      success: true,
-    };
-    res.json(response);
-  } catch (error) {
-    const response: ApiResponse<any> = {
-      data: null,
-      success: false,
-      error: 'An error occurred while fetching categories',
-    };
-    res.status(500).json(response);
-  }
-});
+    const { username, password } = req.body;
 
-app.get('/api/products/:id', (req, res) => {
-  try {
-    const product = productsService.getProductById(req.params.id);
-
-    if (!product) {
-      const response: ApiResponse<any> = {
-        data: null,
+    if (!username || !password) {
+      res.status(400).json({
         success: false,
-        error: 'Product not found',
-      };
-      return res.status(404).json(response);
+        message: 'Username and password are required',
+        data: null,
+      });
+      return;
     }
 
-    const response: ApiResponse<Product> = {
-      data: product,
+    const result = await authService.register(username, password);
+
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        message: result.message,
+        data: null,
+      });
+      return;
+    }
+
+    res.status(201).json({
       success: true,
-    };
-    return res.json(response);
+      message: result.message,
+      data: result.user,
+    });
+    return;
   } catch (error) {
-    const response: ApiResponse<any> = {
-      data: null,
+    res.status(500).json({
       success: false,
-      error: 'An error occurred while fetching the product',
-    };
-    return res.status(500).json(response);
+      message: 'An error occurred during registration',
+      data: null,
+    });
+    return;
   }
+});
+
+// login route
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      res.status(400).json({
+        success: false,
+        message: 'Username and password are required',
+        data: null,
+      });
+      return;
+    }
+
+    const result = await authService.login(username, password);
+
+    if (!result.success || !result.user) {
+      res.status(401).json({
+        success: false,
+        message: result.message,
+        data: null,
+      });
+      return;
+    }
+
+    // create a simple token base64 of username
+    const token = Buffer.from(result.user.username).toString('base64');
+
+    // set httponly cookie
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24, // 1 day expr
+    });
+
+    res.json({
+      success: true,
+      message: result.message,
+      data: result.user,
+    });
+    return;
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred during login',
+      data: null,
+    });
+    return;
+  }
+});
+
+// logout route
+app.post('/api/logout', (_, res) => {
+  res.clearCookie('auth_token');
+  res.json({ success: true, message: 'Logged out successfully' });
+  return;
 });
 
 app.listen(port, host, () => {

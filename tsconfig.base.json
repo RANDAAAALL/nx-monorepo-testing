@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
+    "baseUrl": ".",
+    "declaration": true,
     "importHelpers": true,
     "isolatedModules": true,
-    "lib": ["es2022"],
+    "lib": ["es2022", "dom", "dom.iterable"],
     "module": "esnext",
     "moduleResolution": "bundler",
     "noEmitOnError": true,
@@ -16,6 +15,15 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@org/source"]
+    "customConditions": ["@org/source"],
+    "paths": {
+      "@org/api-auth": ["libs/api/auth/src/index.ts"],
+      "@org/models": ["libs/shared/models/src/index.ts"],
+      "@org/shared-test-utils": ["libs/shared/test-utils/src/index.ts"],
+      "@org/shop-data": ["libs/shop/data/src/index.ts"],
+      "@org/shop-shared-ui": ["libs/shop/shared-ui/src/index.ts"],
+      "@org/web-user": ["apps/web/user/src/index.ts"],
+      "@org/web-admin": ["apps/web/admin/src/index.ts"]
+    }
   }
 }

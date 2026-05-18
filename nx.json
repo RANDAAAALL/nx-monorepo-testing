@@ -19,23 +19,6 @@
   },
   "plugins": [
     {
-      "plugin": "@nx/js/typescript",
-      "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        },
-        "build": {
-          "targetName": "build",
-          "configName": "tsconfig.lib.json",
-          "buildDepsName": "build-deps",
-          "watchDepsName": "watch-deps"
-        }
-      },
-      "exclude": [
-        "libs/shared/models/*"
-      ]
-    },
-    {
       "plugin": "@nx/react/router-plugin",
       "options": {
         "buildTargetName": "build",
@@ -70,17 +53,6 @@
       "options": {
         "targetName": "e2e",
         "ciTargetName": "e2e-ci"
-      }
-    },
-    {
-      "plugin": "@nx/js/typescript",
-      "include": [
-        "libs/shared/models/*"
-      ],
-      "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        }
       }
     },
     {

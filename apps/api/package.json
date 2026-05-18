@@ -123,8 +123,11 @@
     ]
   },
   "dependencies": {
-    "express": "^4.21.2",
-    "@org/api-products": "workspace:*",
-    "@org/models": "workspace:*"
+    "@org/api-auth": "workspace:*",
+    "@org/models": "workspace:*",
+    "@supabase/supabase-js": "^2.105.4",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2"
   }
 }

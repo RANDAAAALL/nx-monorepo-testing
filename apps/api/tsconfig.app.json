@@ -2,10 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "module": "nodenext",
     "types": ["node"],
-    "rootDir": "src",
-    "moduleResolution": "nodenext",
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],
@@ -21,10 +18,10 @@
   ],
   "references": [
     {
-      "path": "../../libs/shared/models/tsconfig.lib.json"
+      "path": "../../libs/api/auth/tsconfig.lib.json"
     },
     {
-      "path": "../../libs/api/products/tsconfig.lib.json"
+      "path": "../../libs/shared/models/tsconfig.lib.json"
     }
   ]
 }
