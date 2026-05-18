@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nx build @org/api",
-    "start": "node build/main.js"
+    "start": "node dist/main.js"
   },
   "nx": {
     "projectType": "application",
@@ -17,7 +17,7 @@
         "defaultConfiguration": "production",
         "options": {
           "platform": "node",
-          "outputPath": "apps/api/build",
+          "outputPath": "dist",
           "format": [
             "cjs"
           ],
@@ -54,8 +54,8 @@
         "cache": true,
         "executor": "@nx/js:prune-lockfile",
         "outputs": [
-          "{workspaceRoot}/apps/api/build/package.json",
-          "{workspaceRoot}/apps/api/build/pnpm-lock.yaml"
+          "{workspaceRoot}/dist/apps/api/package.json",
+          "{workspaceRoot}/dist/apps/api/pnpm-lock.yaml"
         ],
         "options": {
           "buildTarget": "build"
@@ -67,7 +67,7 @@
         ],
         "cache": true,
         "outputs": [
-          "{workspaceRoot}/apps/api/build/workspace_modules"
+          "{workspaceRoot}/dist/apps/api/workspace_modules"
         ],
         "executor": "@nx/js:copy-workspace-modules",
         "options": {
@@ -130,6 +130,7 @@
     "@org/api-auth": "workspace:*",
     "@org/models": "workspace:*",
     "@supabase/supabase-js": "^2.105.4",
+    "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
     "express": "^4.21.2"
