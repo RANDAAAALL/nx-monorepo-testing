@@ -5,7 +5,11 @@
   "scripts": {
     "start:all": "nx run-many -t serve -p @org/web-user @org/web-admin @org/api",
     "start:user": "nx run-many -t serve -p @org/web-user @org/api",
-    "start:admin": "nx run-many -t serve -p @org/web-admin @org/api"
+    "start:admin": "nx run-many -t serve -p @org/web-admin @org/api",
+    "build:web-admin": "pnpm --filter @org/web-admin build",
+    "build:web-user": "pnpm --filter @org/web-user build",
+    "build:api": "pnpm --filter @org/api build",
+    "build": "pnpm run build:web-admin && pnpm run build:web-user && pnpm run build:api"
   },
   "private": true,
   "dependencies": {
