@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "nx build"
+    "build": "nx build @org/api",
+    "start": "node dist/main.js"
   },
   "nx": {
     "projectType": "application",
