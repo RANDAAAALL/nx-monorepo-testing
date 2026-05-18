@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nx build @org/api",
-    "start": "node dist/main.js"
+    "start": "node build/main.js"
   },
   "nx": {
     "projectType": "application",
@@ -17,7 +17,7 @@
         "defaultConfiguration": "production",
         "options": {
           "platform": "node",
-          "outputPath": "apps/api/dist",
+          "outputPath": "apps/api/build",
           "format": [
             "cjs"
           ],
@@ -54,8 +54,8 @@
         "cache": true,
         "executor": "@nx/js:prune-lockfile",
         "outputs": [
-          "{workspaceRoot}/apps/api/dist/package.json",
-          "{workspaceRoot}/apps/api/dist/pnpm-lock.yaml"
+          "{workspaceRoot}/apps/api/build/package.json",
+          "{workspaceRoot}/apps/api/build/pnpm-lock.yaml"
         ],
         "options": {
           "buildTarget": "build"
@@ -67,7 +67,7 @@
         ],
         "cache": true,
         "outputs": [
-          "{workspaceRoot}/apps/api/dist/workspace_modules"
+          "{workspaceRoot}/apps/api/build/workspace_modules"
         ],
         "executor": "@nx/js:copy-workspace-modules",
         "options": {
