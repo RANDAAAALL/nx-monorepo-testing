@@ -144,8 +144,8 @@ app.post('/api/login', async (req, res) => {
     // set httponly cookie
     res.cookie('auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 1000 * 60 * 60 * 24, // 1 day expr
     });
 
@@ -167,7 +167,11 @@ app.post('/api/login', async (req, res) => {
 
 // logout route
 app.post('/api/logout', (_, res) => {
-  res.clearCookie('auth_token');
+  res.clearCookie('auth_token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none'
+  });
   res.json({ success: true, message: 'Logged out successfully' });
   return;
 });
