@@ -21,7 +21,12 @@ export function LoginPage() {
 
       if (response.ok) {
         console.log('Login successful:', result);
-        window.location.href = `${import.meta.env.VITE_USER_NAVIGATE_TO_ADMIN_LOGIN_URL}`;
+        const token = result.data?.token;
+        const redirectUrl = new URL(`${import.meta.env.VITE_USER_NAVIGATE_TO_ADMIN_LOGIN_URL}`);
+        if (token) {
+          redirectUrl.searchParams.set('token', token);
+        }
+        window.location.href = redirectUrl.toString();
       } else {
         setError(result.message || 'Login failed');
       }

@@ -28,7 +28,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header(
     'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization',
   );
   res.header('Access-Control-Allow-Credentials', 'true');
 
@@ -47,7 +47,14 @@ app.get('/', (_, res) => {
 
 // me route to get current user info
 app.get('/api/me', async (req, res) => {
-  const token = req.cookies.auth_token;
+  let token = req.cookies.auth_token;
+  
+  if (!token && req.headers.authorization) {
+    const parts = req.headers.authorization.split(' ');
+    if (parts.length === 2 && parts[0] === 'Bearer') {
+      token = parts[1];
+    }
+  }
 
   if (!token) {
     res.status(401).send('Unauthorized');
@@ -152,7 +159,7 @@ app.post('/api/login', async (req, res) => {
     res.json({
       success: true,
       message: result.message,
-      data: result.user,
+      data: { ...result.user, token },
     });
     return;
   } catch (error) {

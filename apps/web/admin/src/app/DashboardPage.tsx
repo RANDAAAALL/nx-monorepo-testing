@@ -5,14 +5,37 @@ export function DashboardPage() {
 
   // fetch data on mount
   useEffect(() => {
+    // Check URL for token passed from the login app across domains
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenFromUrl = urlParams.get('token');
+    
+    if (tokenFromUrl) {
+      localStorage.setItem('auth_token', tokenFromUrl);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    const token = localStorage.getItem('auth_token');
+
     const fetchUserData = async () => {
-        const res = await fetch(`${import.meta.env.VITE_ADMIN_API_ME_URL}`, { credentials: 'include'});
+        const headers: HeadersInit = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`${import.meta.env.VITE_ADMIN_API_ME_URL}`, { 
+          headers,
+          credentials: 'include'
+        });
         
         if(res.ok){
             const data = await res.json();
             setUsername(data.data.username);
             // console.log('User data fetched successfully:', data);
-        } else { window.location.href = `${import.meta.env.VITE_ADMIN_NAVIGATE_TO_USER_LOGOUT_URL}` }
+        } else { 
+            localStorage.removeItem('auth_token');
+            window.location.href = `${import.meta.env.VITE_ADMIN_NAVIGATE_TO_USER_LOGOUT_URL}` 
+        }
     };
     
     fetchUserData();
@@ -20,10 +43,21 @@ export function DashboardPage() {
 
   const handleLogout = async () => { 
     try {
-      await fetch(`${import.meta.env.VITE_ADMIN_API_LOGOUT_URL}`, { method: 'POST', credentials: 'include' });
+      const token = localStorage.getItem('auth_token');
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      await fetch(`${import.meta.env.VITE_ADMIN_API_LOGOUT_URL}`, { 
+        method: 'POST', 
+        headers,
+        credentials: 'include' 
+      });
     } catch (err: unknown) {
       console.error('Logout error', err instanceof Error ? err.message : err);
     }
+    localStorage.removeItem('auth_token');
     window.location.href = `${import.meta.env.VITE_ADMIN_NAVIGATE_TO_USER_LOGOUT_URL}`;
   }
 
